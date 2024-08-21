@@ -1,0 +1,11 @@
+total 10 words, 10 unique
+('get', 14), 1
+('is', 6), 1
+('names', 6), 1
+('in', 6), 1
+('path', 6), 1
+('name', 4), 1
+('words', 4), 1
+('function', 4), 1
+('from', 4), 1
+('trees', 4), 1

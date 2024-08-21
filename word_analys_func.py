@@ -139,11 +139,3 @@ def get_top_type_word_in_path(path, top_size=10, type_word='ALL'):
             return Counter(flat(all)).most_common(top_size)
 
     return Counter(None)
-
-
-def get_top_functions_names_in_path(path, top_size=10):
-    trees = get_trees(path)
-    nms = (get_function_names_from_trees(trees))
-    nms = [name for name in nms if not is_magic_method(name)]
-
-    return Counter(nms).most_common(top_size)
