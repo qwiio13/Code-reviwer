@@ -53,7 +53,7 @@ def get_trees(path, with_filenames=False, with_file_content=False):
                 break
             if file.endswith('.py'):
                 filenames.append(os.path.join(dirname, file))
-    print(f'total {len(filenames)} files')
+    # print(f'total {len(filenames)} files')
 
     # looping through all python files and creating a tree for each file
     for filename in filenames:
@@ -71,7 +71,7 @@ def get_trees(path, with_filenames=False, with_file_content=False):
                 trees.append((filename, tree))
         else:
             trees.append(tree)
-    print('trees generated')
+    # print('trees generated')
     if len(trees) == 0:
         return None
     return trees
@@ -109,7 +109,7 @@ def get_top_verbs_in_path(path, top_size=10):
 
         names_f = get_function_names_from_trees(trees)
         fncs = [f for f in names_f if not is_magic_method(f)]
-        print('functions extracted')
+        # print('functions extracted')
 
         verbs = [get_verbs_from_function_name(f_name) for f_name in fncs]
 
