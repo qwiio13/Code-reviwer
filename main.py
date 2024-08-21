@@ -26,10 +26,6 @@ def is_magic_method(name: str) -> bool:
     return True if name.startswith('__') and name.endswith('__') else False
 
 
-def skip_magic_method(name):
-    return name if is_magic_method(name) else None
-
-
 def is_ast_func(node: ast) -> bool:
     return True if isinstance(node, ast.FunctionDef) else False
 
@@ -95,7 +91,8 @@ def get_all_words_in_path(path):
     trees = [t for t in get_trees(path) if t]
 
     # getting function names from trees
-    function_names = skip_magic_method([get_all_names(t) for t in trees])
+    function_names = [get_all_names(t) for t in trees]
+    function_names = [n for n in function_names if not is_magic_method(n)]
 
     # getting words from function_names
     words = []
@@ -122,7 +119,8 @@ def get_top_verbs_in_path(path, top_size=10):
 
 def get_top_functions_names_in_path(path, top_size=10):
     trees = get_trees(path)
-    nms = skip_magic_method(get_function_names_from_trees(trees))
+    nms = (get_function_names_from_trees(trees))
+    nms = [name for name in nms if not is_magic_method(name)]
 
     return Counter(nms).most_common(top_size)
 
