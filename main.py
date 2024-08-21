@@ -1,12 +1,9 @@
 import ast
 import os
-import collections
+from collections import Counter
 from itertools import chain
 
 from nltk import pos_tag
-
-
-Path = ''
 
 
 def flat(xs: list) -> list:
@@ -29,8 +26,8 @@ def is_magic_method(name: str) -> bool:
     return True if name.startswith('__') and name.endswith('__') else False
 
 
-def skip_magic_method(xs: list) -> list:
-    return flat([x for x in xs if not is_magic_method(x)])
+def skip_magic_method(name):
+    return name if is_magic_method(name) else None
 
 
 def is_ast_func(node: ast) -> bool:
@@ -41,16 +38,16 @@ def get_function_names_from_trees(trees: list) -> list:
     ret = []
     for t in trees:
         for node in ast.walk(t):
-            ret.append(node.name.lower() if is_ast_func(node) else None)
+            if is_ast_func(node):
+                ret.append(node.name.lower())
     return ret
 
 
-def get_trees(_path, with_filenames=False, with_file_content=False):
+def get_trees(path, with_filenames=False, with_file_content=False):
     # getting trees from up to 100 python files in directories
 
     filenames = []
     trees = []
-    path = Path
 
     # walking through all directories and
     # filling a list with the first 100 Python files
@@ -79,6 +76,8 @@ def get_trees(_path, with_filenames=False, with_file_content=False):
         else:
             trees.append(tree)
     print('trees generated')
+    if len(trees) == 0:
+        return None
     return trees
 
 
@@ -107,20 +106,25 @@ def get_all_words_in_path(path):
 
 
 def get_top_verbs_in_path(path, top_size=10):
-    trees = [t for t in get_trees(None) if t]
-    fncs = skip_magic_method(get_function_names_from_trees(trees))
-    print('functions extracted')
 
-    verbs = [get_verbs_from_function_name(f_name) for f_name in fncs]
+    trees = get_trees(path)
+    if trees is not None:
 
-    return collections.Counter(flat(verbs)).most_common(top_size)
+        names_f = get_function_names_from_trees(trees)
+        fncs = [f for f in names_f if not is_magic_method(f)]
+        print('functions extracted')
+
+        verbs = [get_verbs_from_function_name(f_name) for f_name in fncs]
+
+        return Counter(flat(verbs)).most_common(top_size)
+    return Counter(None)
 
 
 def get_top_functions_names_in_path(path, top_size=10):
     trees = get_trees(path)
     nms = skip_magic_method(get_function_names_from_trees(trees))
 
-    return collections.Counter(nms).most_common(top_size)
+    return Counter(nms).most_common(top_size)
 
 
 wds = []
@@ -138,5 +142,5 @@ for project in projects:
 
 top_size = 200
 print(f'total {len(wds)} words, {len(set(wds))} unique')
-for word, occurence in collections.Counter(wds).most_common(top_size):
+for word, occurence in Counter(wds).most_common(top_size):
     print(word, occurence)
