@@ -1,5 +1,4 @@
 from word_analys_func import get_top_type_word_in_path
-from collections import Counter
 from clone_git import clone_rep
 import sys
 import json
@@ -9,17 +8,17 @@ dir = "clone_dir"
 url = "https://github.com/qwiio13/web_python.git"
 
 
-def write_to_file(words, stream='print', top_size=200, path='logs/log.txt'):
+def write_to_file(words, stream='print', path='logs/log.txt'):
     if stream == 'print':
         print(f'total {len(words)} words, {len(set(words))} unique')
-        for word, occurence in Counter(words).most_common(top_size):
-            print(word, occurence)
+        for word, occurence in words.items():
+            print(word, occurence, sep=', ')
 
     if stream == 'txt':
         print(f'log to txt {path}')
         with open(path, 'w') as file:
             file.write(f'total {len(words)} words, {len(set(words))} unique\n')
-            for word, occurence in Counter(words).most_common(top_size):
+            for word, occurence in words.items():
                 file.write(f'{word}, {occurence}\n')
 
     if stream == 'csv':
@@ -28,7 +27,7 @@ def write_to_file(words, stream='print', top_size=200, path='logs/log.txt'):
         with open(path_csv, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['Word', 'Occurrence'])
-            for word, occurrence in words:
+            for word, occurrence in words.items():
                 writer.writerow([word, occurrence])
 
     elif stream == 'json':
@@ -38,14 +37,13 @@ def write_to_file(words, stream='print', top_size=200, path='logs/log.txt'):
             'total_words': len(words),
             'unique_words': len(set(words))
         }
-        for word, occurence in words:
-            data.update({f'{word}': occurence})
+        data.update(dict(words))
         with open(path_json, 'w') as file:
             json.dump(data, file, indent=4)
 
 
-def call_get_top(type_word, stream):
-    words = get_top_type_word_in_path(dir, type_word=type_word)
+def call_get_top(type_word, stream, inner):
+    words = get_top_type_word_in_path(dir, type_word=type_word, inner=inner)
     write_to_file(words, stream)
 
 
@@ -72,11 +70,16 @@ if __name__ == '__main__':
     else:
         stream = 'print'
 
+    if 'inner' in sys.argv:
+        inner = True
+    else:
+        inner = False
+
     if 'vb' in sys.argv:
-        call_get_top('VB', stream=stream)
+        call_get_top('VB', stream=stream, inner=inner)
 
     if 'nn' in sys.argv:
-        call_get_top('NN', stream=stream)
+        call_get_top('NN', stream=stream, inner=inner)
 
     if 'all' in sys.argv:
-        call_get_top('ALL', stream=stream)
+        call_get_top('ALL', stream=stream, inner=inner)

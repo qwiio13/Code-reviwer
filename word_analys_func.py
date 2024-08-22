@@ -46,6 +46,24 @@ def get_function_names_from_trees(trees: list) -> list:
     return ret
 
 
+def get_ast_function_from_trees(trees):
+    ret = []
+    for t in trees:
+        for node in ast.walk(t):
+            if is_ast_func(node):
+                ret.append(node)
+    return ret
+
+
+def get_name_local_var_from_func_ast(func_ast):
+    ret = []
+    for func in func_ast:
+        for node in ast.walk(func):
+            if isinstance(node, ast.Name) and not is_ast_func(node):
+                ret.append(node.id)
+    return ret
+
+
 def get_trees(path, with_filenames=False, with_file_content=False):
     # getting trees from up to 100 python files in directories
 
@@ -119,23 +137,31 @@ def get_all_words_in_path(path):
     return flat(words)
 
 
-def get_top_type_word_in_path(path, top_size=10, type_word='ALL'):
+def call_get_name_type_word(type_word, names):
+    if type_word == 'VB':
+        verbs = [get_verbs_from_function_name(n) for n in names]
+        return Counter(flat(verbs))
+    if type_word == 'NN':
+        noun = [get_noun_from_function_name(n) for n in names]
+        return Counter(flat(noun))
+    if type_word == 'ALL':
+        all = [get_word_from_function_name(n) for n in names]
+        return Counter(flat(all))
 
+
+def get_top_type_word_in_path(path, type_word='ALL', inner=False):
     trees = get_trees(path)
+
     if trees is not None:
+        if not inner:
+            names_f = get_function_names_from_trees(trees)
+            fncs = [f for f in names_f if not is_magic_method(f)]
 
-        names_f = get_function_names_from_trees(trees)
-        fncs = [f for f in names_f if not is_magic_method(f)]
-        # print('functions extracted')
+            return call_get_name_type_word(type_word, fncs)
+        elif inner:
+            funcs = get_ast_function_from_trees(trees)
+            name_loc_var = get_name_local_var_from_func_ast(funcs)
 
-        if type_word == 'VB':
-            verbs = [get_verbs_from_function_name(f_name) for f_name in fncs]
-            return Counter(flat(verbs)).most_common(top_size)
-        if type_word == 'NN':
-            noun = [get_noun_from_function_name(f_name) for f_name in fncs]
-            return Counter(flat(noun)).most_common(top_size)
-        if type_word == 'ALL':
-            all = [get_word_from_function_name(f_name) for f_name in fncs]
-            return Counter(flat(all)).most_common(top_size)
+            return call_get_name_type_word(type_word, name_loc_var)
 
     return Counter(None)
