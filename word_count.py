@@ -57,10 +57,6 @@ if __name__ == '__main__':
         except IndexError:
             clone_rep(url, dir)
 
-    if '-clone_from' in sys.argv:
-        url = sys.argv[2]
-        clone_rep(url, dir)
-
     if '-stream' in sys.argv:
         index = sys.argv.index('-stream')
         try:
