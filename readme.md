@@ -1,4 +1,4 @@
-# Code Reviwer
+# Code-reviwer
 Code Reviewer is a Python library for alnalyzing your Python code
 
 ## installation
